@@ -1,0 +1,8 @@
+
+
+// admin routes
+/*
+/add-doctor (POST)
+/login-admin (store admin credentials in env, POST)
+
+*/

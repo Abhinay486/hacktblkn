@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// Domain Models
+// --------------------------------------
+
+// Doctor model derived from listed fields.
+// slotsBooked: stores indices (or IDs) of booked time slots for the current / upcoming day(s).
+model Doctor {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  password     String
+  image        String?        // optional avatar URL
+  speciality   String
+  degree       String?
+  experience   Int?           // years of experience
+  about        String?
+  available    Boolean        @default(true)
+  fees         Int?           // consultation fees (minor currency unit or integer amount)
+  address      String?
+  slotsBooked  Int[]          @default([]) // slot indices already booked
+  appointments Appointment[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+// User model (patients / consumers of the service)
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  password     String
+  image        String         @default("")
+  address      String?
+  gender       Gender?
+  phone        String?        @unique
+  appointments Appointment[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+// Appointment linking a User and a Doctor.
+model Appointment {
+  id         String              @id @default(cuid())
+  date       DateTime            // exact date & time of the appointment
+  slot       Int                 // numeric slot index within the day
+  status     AppointmentStatus   @default(PENDING)
+  notes      String?
+
+  user       User                @relation(fields: [userId], references: [id])
+  userId     String
+  doctor     Doctor              @relation(fields: [doctorId], references: [id])
+  doctorId   String
+
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([date])
+  @@index([doctorId, date])
+  @@index([userId, date])
+}
+
+// --------------------------------------
+// Enums
+// --------------------------------------
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
