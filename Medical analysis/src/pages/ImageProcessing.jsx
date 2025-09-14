@@ -101,7 +101,7 @@ some of the symptoms are ${symptom}`;
     }
 
     setLoading(true);
-    const genAI = new GoogleGenerativeAI("AIzaSyA0kmiabFS6tpoBhjCme1HoFy5KcMTgirU");
+    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const imagePart = {
